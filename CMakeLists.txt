@@ -30,6 +30,17 @@ option(RAPIDJSON_BUILD_TESTS "Build rapidjson perftests and unittests." ON)
 option(RAPIDJSON_BUILD_THIRDPARTY_GTEST
     "Use gtest installation in `thirdparty/gtest` by default if available" OFF)
 
+if (MSVC)
+    foreach (flag_var
+                CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+                CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+        if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
+        # Because gtest also overrides it
+        string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+        endif()
+    endforeach()
+endif()
+
 option(RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11 (gcc/clang)" ON)
 
 option(RAPIDJSON_BUILD_ASAN "Build rapidjson with address sanitizer (gcc/clang)" OFF)
@@ -123,6 +134,7 @@ if(RAPIDJSON_BUILD_TESTS)
         # required for VS2012 due to missing support for variadic templates
         add_definitions(-D_VARIADIC_MAX=10)
     endif(MSVC11)
+    option(INSTALL_GTEST "Install Googletest's GTest?" OFF)
     add_subdirectory(test)
     include(CTest)
 endif()
@@ -141,8 +153,8 @@ install(FILES readme.md
         DESTINATION "${DOC_INSTALL_DIR}"
         COMPONENT doc)
 
-install(DIRECTORY include/rapidjson
-    DESTINATION "${INCLUDE_INSTALL_DIR}"
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION include
     COMPONENT dev)
 
 install(DIRECTORY example/
@@ -157,17 +169,35 @@ install(DIRECTORY example/
 # Provide config and version files to be used by other applications
 # ===============================
 
-export(PACKAGE ${PROJECT_NAME})
+################################################################################
+# Export package for use from the build tree
+# EXPORT( PACKAGE ${PROJECT_NAME} )
 
-# cmake-modules
-CONFIGURE_FILE(${PROJECT_NAME}Config.cmake.in
-    ${PROJECT_NAME}Config.cmake
-    @ONLY)
-CONFIGURE_FILE(${PROJECT_NAME}ConfigVersion.cmake.in
-    ${PROJECT_NAME}ConfigVersion.cmake
-    @ONLY)
-INSTALL(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-    DESTINATION "${CMAKE_INSTALL_DIR}"
-    COMPONENT dev)
+add_library(RapidJSON INTERFACE)
+target_include_directories(RapidJSON INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${PROJECT_BINARY_DIR}/RapidJSONConfigVersion.cmake"
+    VERSION ${LIB_VERSION_STRING}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(TARGETS RapidJSON
+    EXPORT RapidJSONConfig
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+export(TARGETS RapidJSON
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/RapidJSONConfig.cmake"
+)
+install(EXPORT RapidJSONConfig
+    DESTINATION lib/cmake
+)
+install(FILES "${PROJECT_BINARY_DIR}/RapidJSONConfigVersion.cmake"
+        DESTINATION lib/cmake)
