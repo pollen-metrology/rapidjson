@@ -1076,10 +1076,10 @@ TEST(Value, ArrayHelper) {
         a.PushBack(1, allocator);
 
         Value::Array a2(a); // copy constructor
-        EXPECT_EQ(1, a2.Size());
+        EXPECT_EQ(SizeType(1), a2.Size());
 
         Value::Array a3 = a;
-        EXPECT_EQ(1, a3.Size());
+        EXPECT_EQ(SizeType(1), a3.Size());
 
         Value::ConstArray y = static_cast<const Value&>(x).GetArray();
         (void)y;
@@ -1116,7 +1116,7 @@ TEST(Value, ArrayHelper) {
         y.PushBack(123, allocator);
         x.PushBack(y.GetArray(), allocator);    // Implicit constructor to convert Array to GenericValue
 
-        EXPECT_EQ(1, x.Size());
+        EXPECT_EQ(SizeType(1), x.Size());
         EXPECT_EQ(123, x[0][0].GetInt());
         EXPECT_TRUE(y.IsArray());
         EXPECT_TRUE(y.Empty());
@@ -1457,10 +1457,10 @@ TEST(Value, ObjectHelper) {
         o.AddMember("1", 1, allocator);
 
         Value::Object o2(o); // copy constructor
-        EXPECT_EQ(1, o2.MemberCount());
+        EXPECT_EQ(SizeType(1), o2.MemberCount());
 
         Value::Object o3 = o;
-        EXPECT_EQ(1, o3.MemberCount());
+        EXPECT_EQ(SizeType(1), o3.MemberCount());
 
         Value::ConstObject y = static_cast<const Value&>(x).GetObject();
         (void)y;

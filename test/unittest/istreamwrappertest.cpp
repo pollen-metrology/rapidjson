@@ -129,7 +129,7 @@ TEST(IStreamWrapper, ifstream) {
     Document d;
     EXPECT_TRUE(!d.ParseStream(eis).HasParseError());
     EXPECT_TRUE(d.IsObject());
-    EXPECT_EQ(5, d.MemberCount());
+    EXPECT_EQ(SizeType(5), d.MemberCount());
 }
 
 TEST(IStreamWrapper, fstream) {
@@ -140,7 +140,7 @@ TEST(IStreamWrapper, fstream) {
     Document d;
     EXPECT_TRUE(!d.ParseStream(eis).HasParseError());
     EXPECT_TRUE(d.IsObject());
-    EXPECT_EQ(5, d.MemberCount());
+    EXPECT_EQ(SizeType(5), d.MemberCount());
 }
 
 // wifstream/wfstream only works on C++11 with codecvt_utf16
