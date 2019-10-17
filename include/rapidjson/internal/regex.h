@@ -301,6 +301,7 @@ private:
                     if (!CharacterEscape(ds, &codepoint))
                         return; // Unsupported escape character
                     // fall through to default
+                    __attribute__((fallthrough));
 
                 default: // Pattern character
                     PushOperand(operandStack, codepoint);
@@ -535,6 +536,7 @@ private:
                 else if (!CharacterEscape(ds, &codepoint))
                     return false;
                 // fall through to default
+                __attribute__((fallthrough));
 
             default:
                 switch (step) {
@@ -544,6 +546,7 @@ private:
                         break;
                     }
                     // fall through to step 0 for other characters
+                    __attribute__((fallthrough));
 
                 case 0:
                     {
